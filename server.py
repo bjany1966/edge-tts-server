@@ -11,9 +11,9 @@ VOICE = "hu-HU-NoemiNeural"
 @app.get("/tts")
 async def tts(text: str):
 
-    communicate = edge_tts.Communicate(text, VOICE)
-
     tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+
+    communicate = edge_tts.Communicate(text, VOICE)
 
     async for chunk in communicate.stream():
         if chunk["type"] == "audio":
