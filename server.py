@@ -9,10 +9,9 @@ VOICE = "hu-HU-NoemiNeural"
 
 @app.get("/tts")
 async def tts(text: str):
-
-```
 communicate = edge_tts.Communicate(text, VOICE)
 
+```
 audio_data = io.BytesIO()
 
 async for chunk in communicate.stream():
@@ -28,4 +27,5 @@ return Response(
     }
 )
 ```
+
 
