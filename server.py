@@ -9,6 +9,7 @@ VOICE = "hu-HU-NoemiNeural"
 
 @app.get("/tts")
 async def tts(text: str):
+
     communicate = edge_tts.Communicate(text, VOICE)
 
     audio_data = io.BytesIO()
@@ -17,12 +18,14 @@ async def tts(text: str):
         if chunk["type"] == "audio":
             audio_data.write(chunk["data"])
 
+    mp3 = audio_data.getvalue()
+
     return Response(
-        content=audio_data.getvalue(),
+        content=mp3,
         media_type="audio/mpeg",
         headers={
-            "Cache-Control": "no-cache",
-            "Content-Disposition": "inline; filename=tts.mp3"
+            "Content-Length": str(len(mp3)),
+            "Accept-Ranges": "bytes",
+            "Connection": "close"
         }
     )
-
