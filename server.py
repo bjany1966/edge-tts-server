@@ -1,9 +1,7 @@
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi.responses import Response
 import edge_tts
-import tempfile
-import wave
-import asyncio
+import io
 
 app = FastAPI()
 
@@ -14,21 +12,13 @@ async def tts(text: str):
 
     communicate = edge_tts.Communicate(text, VOICE)
 
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
-
-    pcm = bytearray()
+    pcm = io.BytesIO()
 
     async for chunk in communicate.stream():
         if chunk["type"] == "audio":
-            pcm.extend(chunk["data"])
+            pcm.write(chunk["data"])
 
-    with wave.open(tmp.name, "wb") as wf:
-        wf.setnchannels(1)
-        wf.setsampwidth(2)
-        wf.setframerate(24000)
-        wf.writeframes(pcm)
-
-    return FileResponse(
-        tmp.name,
-        media_type="audio/wav"
+    return Response(
+        content=pcm.getvalue(),
+        media_type="application/octet-stream"
     )
