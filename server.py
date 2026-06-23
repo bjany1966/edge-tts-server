@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from fastapi.responses import Response
+from fastapi.responses import FileResponse
 import edge_tts
-import io
+import tempfile
 
 app = FastAPI()
 
@@ -10,15 +10,14 @@ VOICE = "hu-HU-NoemiNeural"
 @app.get("/tts")
 async def tts(text: str):
 
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+
     communicate = edge_tts.Communicate(text, VOICE)
 
-    pcm = io.BytesIO()
+    await communicate.save(tmp.name)
 
-    async for chunk in communicate.stream():
-        if chunk["type"] == "audio":
-            pcm.write(chunk["data"])
-
-    return Response(
-        content=pcm.getvalue(),
-        media_type="application/octet-stream"
+    return FileResponse(
+        tmp.name,
+        media_type="audio/mpeg",
+        filename="tts.mp3"
     )
