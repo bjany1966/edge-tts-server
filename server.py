@@ -1,23 +1,22 @@
-from fastapi import FastAPI
-from fastapi.responses import FileResponse
-import edge_tts
-import tempfile
+WiFiClient *stream = http.getStreamPtr();
 
-app = FastAPI()
+while (http.connected()) {
+  int len = stream->available();
+  if (len) {
+    uint8_t buf[64];
+    int r = stream->readBytes(buf, 64);
 
-VOICE = "hu-HU-NoemiNeural"
+    Serial.print("BYTES: ");
+    Serial.println(r);
 
-@app.get("/tts")
-async def tts(text: str):
+    // első pár byte kiírás
+    for (int i = 0; i < 16; i++) {
+      Serial.print(buf[i], HEX);
+      Serial.print(" ");
+    }
+    Serial.println();
 
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
-
-    communicate = edge_tts.Communicate(text, VOICE)
-
-    await communicate.save(tmp.name)
-
-    return FileResponse(
-        tmp.name,
-        media_type="audio/mpeg",
-        filename="tts.mp3"
-    )
+    size_t out;
+    i2s_write(I2S_NUM_0, buf, r, &out, portMAX_DELAY);
+  }
+}
