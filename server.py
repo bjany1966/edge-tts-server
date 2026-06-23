@@ -18,6 +18,5 @@ async def tts(text: str):
 
     return FileResponse(
         tmp.name,
-        media_type="audio/mpeg",
-        filename="tts.mp3"
+        media_type="audio/mpeg"
     )
