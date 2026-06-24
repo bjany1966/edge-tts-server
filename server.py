@@ -5,7 +5,7 @@ import subprocess
 
 app = FastAPI()
 
-client = OpenAI(api_key="SK-YOUR_KEY")
+client = OpenAI(api_key="sk_59414b9317ea7229b1f35a34ce35a72a109c5dd03b3a8b10")
 
 @app.get("/")
 def home():
