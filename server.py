@@ -1,10 +1,15 @@
 from fastapi import FastAPI, Request
+import os
 from openai import OpenAI
-import tempfile
 
 app = FastAPI()
 
-client = OpenAI(api_key="sk_59414b9317ea7229b1f35a34ce35a72a109c5dd03b3a8b10")
+# 🔥 API KEY ENV-ből
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+@app.get("/")
+def home():
+    return {"status": "running"}
 
 @app.post("/stt")
 async def stt(request: Request):
@@ -13,19 +18,21 @@ async def stt(request: Request):
         audio = await request.body()
         print("Audio bytes:", len(audio))
 
-        # 👉 csak mentés (FFMPEG nélkül!)
-        f = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
-        f.write(audio)
-        f.close()
+        # 🔥 Whisper (STT)
+        result = client.audio.transcriptions.create(
+            model="whisper-1",
+            file=("audio.wav", audio)
+        )
 
-        with open(f.name, "rb") as file:
-            transcript = client.audio.transcriptions.create(
-                model="whisper-1",
-                file=file
-            )
+        text = result.text
+        print("USER:", text)
 
-        return {"text": transcript.text}
+        return {
+            "text": text
+        }
 
     except Exception as e:
         print("ERROR:", str(e))
-        return {"error": str(e)}
+        return {
+            "error": str(e)
+        }
