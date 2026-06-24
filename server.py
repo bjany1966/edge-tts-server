@@ -14,23 +14,29 @@ async def stt(request: Request):
         audio = await request.body()
         print("Audio bytes:", len(audio))
 
-        # 🔥 WAV FILE KÉZI FELÉPÍTÉS
-        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+        # 🔥 sanity check (EZ FONTOS)
+        if len(audio) < 1000:
+            return {"error": "too short audio"}
 
-        with wave.open(tmp.name, "wb") as wf:
+        tmp_path = tempfile.NamedTemporaryFile(delete=False, suffix=".wav").name
+
+        # 🔥 FIXED WAV HEADER
+        with wave.open(tmp_path, "wb") as wf:
             wf.setnchannels(1)
-            wf.setsampwidth(2)   # 16-bit
+            wf.setsampwidth(2)      # 16-bit
             wf.setframerate(16000)
             wf.writeframes(audio)
 
-        with open(tmp.name, "rb") as f:
-            result = client.audio.transcriptions.create(
+        with open(tmp_path, "rb") as f:
+            transcript = client.audio.transcriptions.create(
                 model="whisper-1",
                 file=f
             )
 
-        return {"text": result.text}
+        return {
+            "text": transcript.text
+        }
 
     except Exception as e:
-        print("ERROR:", str(e))
+        print("ERROR:", repr(e))
         return {"error": str(e)}
