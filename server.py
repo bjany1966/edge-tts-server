@@ -6,7 +6,7 @@ import openai
 import os
 
 app = FastAPI()
-client = openai.OpenAI(api_key="YOUR_KEY")
+client = openai.OpenAI(api_key="sk-1234567890abcdef1234567890abcdef12345678")
 
 SAMPLE_RATE = 16000
 CHANNELS = 1
