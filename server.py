@@ -7,12 +7,22 @@ from openai import OpenAI
 
 app = FastAPI()
 
-client = OpenAI(api_key=os.environ["sk_59414b9317ea7229b1f35a34ce35a72a109c5dd03b3a8b10"].strip())
+def get_client():
+    key = os.getenv("sk_59414b9317ea7229b1f35a34ce35a72a109c5dd03b3a8b10", "").strip()
+    if not key:
+        raise RuntimeError("OPENAI_API_KEY missing")
+    return OpenAI(api_key=key)
+
+@app.get("/")
+def root():
+    return {"ok": True}
 
 @app.post("/stt")
 async def stt(request: Request):
     try:
         audio = await request.body()
+        if not audio:
+            raise HTTPException(status_code=400, detail="empty audio")
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
             with wave.open(tmp, "wb") as wf:
@@ -22,6 +32,7 @@ async def stt(request: Request):
                 wf.writeframes(audio)
             wav_path = tmp.name
 
+        client = get_client()
         with open(wav_path, "rb") as f:
             result = client.audio.transcriptions.create(
                 model="whisper-1",
