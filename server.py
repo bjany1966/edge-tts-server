@@ -1,32 +1,24 @@
-from fastapi import FastAPI
-from fastapi.responses import Response
-import edge_tts
+from fastapi import FastAPI, Request
 import tempfile
 import subprocess
+import openai
 
 app = FastAPI()
 
-VOICE = "hu-HU-NoemiNeural"
+@app.post("/stt")
+async def stt(request: Request):
 
-@app.get("/tts")
-async def tts(text: str):
+    audio = await request.body()
 
-    wav_file = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
-    pcm_file = tempfile.NamedTemporaryFile(delete=False, suffix=".raw")
+    wav = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+    wav.write(audio)
+    wav.close()
 
-    communicate = edge_tts.Communicate(text, VOICE)
-    await communicate.save(wav_file.name)
+    # Whisper
+    with open(wav.name, "rb") as f:
+        text = openai.audio.transcriptions.create(
+            model="whisper-1",
+            file=f
+        )
 
-    subprocess.run([
-        "ffmpeg",
-        "-y",
-        "-i", wav_file.name,
-        "-f", "s16le",
-        "-ar", "16000",
-        "-ac", "1",
-        pcm_file.name
-    ])
-
-    data = open(pcm_file.name, "rb").read()
-
-    return Response(content=data, media_type="application/octet-stream")
+    return {"text": text.text}
