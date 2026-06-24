@@ -1,9 +1,15 @@
-import os
-from openai import OpenAI
+from fastapi import FastAPI, Request
 
-key = os.environ["OPENAI_API_KEY"].strip()
-print(repr(key[:12]), len(key))
-print("KEY PREFIX:", repr(os.getenv("OPENAI_API_KEY", "")[:10]))
+app = FastAPI()
 
-client = OpenAI(api_key=key)
-print(client.models.list())
+@app.post("/stt")
+async def stt(request: Request):
+
+    audio = await request.body()
+
+    print("Audio received:", len(audio))
+
+    # 👉 ide jön majd Whisper / AI
+    text = "szia"
+
+    return {"text": text}
