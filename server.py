@@ -8,7 +8,7 @@ from openai import OpenAI
 app = FastAPI()
 
 def get_client():
-    key = os.getenv("sk_59414b9317ea7229b1f35a34ce35a72a109c5dd03b3a8b10", "").strip()
+    key = os.getenv("OPENAI_API_KEY", "").strip()
     if not key:
         raise RuntimeError("OPENAI_API_KEY missing")
     return OpenAI(api_key=key)
