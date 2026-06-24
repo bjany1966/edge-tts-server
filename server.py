@@ -8,10 +8,13 @@ def home():
 
 @app.post("/stt")
 async def stt(request: Request):
+
     audio = await request.body()
-    print("Audio:", len(audio))
+    print("Audio bytes:", len(audio))
+
+    # 👉 most még FIX válasz (teszt stabilitás)
+    text = "szia"
 
     return {
-        "text": "teszt",
-        "reply": "szia"
+        "text": text
     }
