@@ -37,6 +37,8 @@ async def stt(request: Request):
         print("TRANSCRIPT:", text)
         print("KEY EXISTS:", bool(os.getenv("OPENAI_API_KEY")))
         print("KEY START:", os.getenv("OPENAI_API_KEY")[:8])
+        print("KEY EXISTS:", os.getenv("OPENAI_API_KEY") is not None)
+print("KEY START:", str(os.getenv("OPENAI_API_KEY"))[:10])
 
         return {"text": text}
 
