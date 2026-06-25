@@ -1,5 +1,7 @@
-@app.post("/stt")
-async def stt(request: Request):
-    audio = await request.body()
-    print("Audio:", len(audio))
-    return {"text": "ok"}
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def root():
+    return {"status": "OK"}
