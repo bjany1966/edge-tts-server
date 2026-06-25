@@ -1,6 +1,11 @@
 from fastapi import FastAPI, Request
+import os
+from openai import OpenAI
+import tempfile
 
 app = FastAPI()
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @app.get("/")
 def root():
@@ -14,4 +19,25 @@ async def stt(request: Request):
     print("STT HIT")
     print("Audio bytes:", len(audio))
 
-    return {"text": "test"}
+    if len(audio) < 2000:
+        return {"error": "too short audio"}
+
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+    tmp.write(audio)
+    tmp.close()
+
+    try:
+        with open(tmp.name, "rb") as f:
+            result = client.audio.transcriptions.create(
+                model="whisper-1",
+                file=f
+            )
+
+        text = result.text
+        print("TRANSCRIPT:", text)
+
+        return {"text": text}
+
+    except Exception as e:
+        print("WHISPER ERROR:", repr(e))
+        return {"error": str(e)}
