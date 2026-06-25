@@ -17,6 +17,7 @@ async def stt(request: Request):
     text = data.get("text", "")
 
     print("USER:", text)
+    print("KEY:", GEMINI_API_KEY)
 
     try:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
@@ -31,15 +32,15 @@ async def stt(request: Request):
             ]
         }
 
-       r = requests.post(url, json=payload, timeout=20)
-result = r.json()
+        r = requests.post(url, json=payload, timeout=20)
+        result = r.json()
 
-print("RAW:", result)
+        print("RAW:", result)
 
-if "candidates" not in result:
-    return {"error": result}
+        if "candidates" not in result:
+            return {"error": result}
 
-answer = result["candidates"][0]["content"]["parts"][0]["text"]
+        answer = result["candidates"][0]["content"]["parts"][0]["text"]
 
         return {
             "text": text,
@@ -48,5 +49,4 @@ answer = result["candidates"][0]["content"]["parts"][0]["text"]
 
     except Exception as e:
         print("🔥 FULL ERROR:", repr(e))
-        print("KEY:", GEMINI_API_KEY)
         return {"error": str(e)}
