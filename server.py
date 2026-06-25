@@ -59,5 +59,7 @@ async def stt(request: Request):
         }
 
     except Exception as e:
+    print("WHISPER FULL ERROR:", repr(e))
+    return {"error": str(e)}
         print("GPT ERROR:", repr(e))
-        return {"error": "gpt failed"}
+        
