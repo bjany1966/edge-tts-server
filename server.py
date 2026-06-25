@@ -4,8 +4,6 @@ from openai import OpenAI
 import tempfile
 
 app = FastAPI()
-
-# ✔ helyes OpenAI init (sk-proj kompatibilis)
 client = OpenAI()
 
 @app.get("/")
@@ -20,8 +18,6 @@ async def stt(request: Request):
     print("STT HIT")
     print("Audio bytes:", len(audio))
 
-    print("KEY EXISTS:", os.getenv("OPENAI_API_KEY") is not None)
-
     if len(audio) < 2000:
         return {"error": "too short audio"}
 
@@ -29,18 +25,39 @@ async def stt(request: Request):
     tmp.write(audio)
     tmp.close()
 
+    # 🎤 1. WHISPER
     try:
         with open(tmp.name, "rb") as f:
-            result = client.audio.transcriptions.create(
+            transcript = client.audio.transcriptions.create(
                 model="whisper-1",
                 file=f
             )
 
-        text = result.text
-        print("TRANSCRIPT:", text)
-
-        return {"text": text}
+        user_text = transcript.text
+        print("USER:", user_text)
 
     except Exception as e:
         print("WHISPER ERROR:", repr(e))
-        return {"error": str(e)}
+        return {"error": "whisper failed"}
+
+    # 🤖 2. GPT
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "Te egy segítőkész magyar hangasszisztens vagy."},
+                {"role": "user", "content": user_text}
+            ]
+        )
+
+        answer = response.choices[0].message.content
+        print("GPT:", answer)
+
+        return {
+            "text": user_text,
+            "reply": answer
+        }
+
+    except Exception as e:
+        print("GPT ERROR:", repr(e))
+        return {"error": "gpt failed"}
