@@ -38,7 +38,7 @@ async def stt(request: Request):
             ]
         }
 
-        r = requests.post(url, json=payload, timeout=20)
+        r = requests.post(url, json=payload, timeout=10, headers={"Content-Type":"application/json"})
 
         print("STATUS:", r.status_code)
         print("RAW TEXT:", r.text)
