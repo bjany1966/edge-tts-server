@@ -4,18 +4,17 @@ app = FastAPI()
 
 @app.get("/")
 def root():
-return {"version": "TEST_12345"}
+    return {"status": "ok"}
 
 @app.post("/stt")
 async def stt(request: Request):
 
-```
-print("STT HIT")
+    audio = await request.body()
 
-audio = await request.body()
+    print("STT HIT")
+    print("Audio bytes:", len(audio))
 
-return {
-    "bytes": len(audio),
-    "version": "TEST_12345"
-}
-```
+    return {
+        "status": "received",
+        "bytes": len(audio)
+    }
