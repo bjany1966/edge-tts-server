@@ -5,7 +5,8 @@ import tempfile
 
 app = FastAPI()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# ✔ helyes OpenAI init (sk-proj kompatibilis)
+client = OpenAI()
 
 @app.get("/")
 def root():
@@ -18,6 +19,8 @@ async def stt(request: Request):
 
     print("STT HIT")
     print("Audio bytes:", len(audio))
+
+    print("KEY EXISTS:", os.getenv("OPENAI_API_KEY") is not None)
 
     if len(audio) < 2000:
         return {"error": "too short audio"}
@@ -35,10 +38,6 @@ async def stt(request: Request):
 
         text = result.text
         print("TRANSCRIPT:", text)
-        print("KEY EXISTS:", bool(os.getenv("OPENAI_API_KEY")))
-        print("KEY START:", os.getenv("OPENAI_API_KEY")[:8])
-        print("KEY EXISTS:", os.getenv("OPENAI_API_KEY") is not None)
-print("KEY START:", str(os.getenv("OPENAI_API_KEY"))[:10])
 
         return {"text": text}
 
