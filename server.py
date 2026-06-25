@@ -44,5 +44,5 @@ async def stt(request: Request):
         }
 
     except Exception as e:
-        print("ERROR:", repr(e))
+        print("🔥 FULL ERROR:", repr(e))
         return {"error": str(e)}
