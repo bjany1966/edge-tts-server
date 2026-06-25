@@ -25,22 +25,22 @@ async def stt(request: Request):
     tmp.write(audio)
     tmp.close()
 
-    # 🎤 1. WHISPER
+    # 🎤 WHISPER
     try:
         with open(tmp.name, "rb") as f:
-    result = client.audio.transcriptions.create(
-        model="gpt-4o-mini-transcribe",
-        file=f
-    )
+            transcript = client.audio.transcriptions.create(
+                model="gpt-4o-mini-transcribe",
+                file=f
+            )
 
         user_text = transcript.text
         print("USER:", user_text)
 
     except Exception as e:
         print("WHISPER ERROR:", repr(e))
-        return {"error": "whisper failed"}
+        return {"error": str(e)}
 
-    # 🤖 2. GPT
+    # 🤖 GPT
     try:
         response = client.chat.completions.create(
             model="gpt-4o-mini",
@@ -59,6 +59,5 @@ async def stt(request: Request):
         }
 
     except Exception as e:
-    print("WHISPER FULL ERROR:", repr(e))
-    return {"error": str(e)}
-        
+        print("GPT ERROR:", repr(e))
+        return {"error": str(e)}
