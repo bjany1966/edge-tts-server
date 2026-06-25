@@ -31,12 +31,15 @@ async def stt(request: Request):
             ]
         }
 
-        r = requests.post(url, json=payload, timeout=20)
-        result = r.json()
+       r = requests.post(url, json=payload, timeout=20)
+result = r.json()
 
-        print("RAW:", result)
+print("RAW:", result)
 
-        answer = result["candidates"][0]["content"]["parts"][0]["text"]
+if "candidates" not in result:
+    return {"error": result}
+
+answer = result["candidates"][0]["content"]["parts"][0]["text"]
 
         return {
             "text": text,
