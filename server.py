@@ -4,22 +4,28 @@ import os
 
 app = FastAPI()
 
+# 🔑 ENV VAR (Renderről jön)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
 
 @app.get("/")
 def root():
     return {"status": "OK"}
 
+
 @app.post("/stt")
 async def stt(request: Request):
 
-    data = await request.json()
-    text = data.get("text", "")
-
-    print("USER:", text)
-    print("KEY:", GEMINI_API_KEY)
-
     try:
+        data = await request.json()
+        text = data.get("text", "")
+
+        print("USER:", text)
+        print("KEY:", GEMINI_API_KEY)
+
+        if not GEMINI_API_KEY:
+            return {"error": "NO API KEY SET"}
+
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
 
         payload = {
@@ -33,12 +39,23 @@ async def stt(request: Request):
         }
 
         r = requests.post(url, json=payload, timeout=20)
-        result = r.json()
 
-        print("RAW:", result)
+        print("STATUS:", r.status_code)
+        print("RAW TEXT:", r.text)
+
+        try:
+            result = r.json()
+        except Exception:
+            return {
+                "error": "Gemini did not return JSON",
+                "raw": r.text
+            }
 
         if "candidates" not in result:
-            return {"error": result}
+            return {
+                "error": "No candidates in response",
+                "raw": result
+            }
 
         answer = result["candidates"][0]["content"]["parts"][0]["text"]
 
@@ -48,6 +65,5 @@ async def stt(request: Request):
         }
 
     except Exception as e:
-        print("🔥 FULL ERROR:", repr(e))
-        print("KEY IS:", GEMINI_API_KEY)
+        print("🔥 HARD CRASH:", repr(e))
         return {"error": str(e)}
