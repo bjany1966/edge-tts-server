@@ -28,7 +28,7 @@ async def stt(request: Request):
         }
         print("KEY LENGTH:", len(GEMINI_API_KEY))
         print("RESPONSE OBJ:", response)
-print("TEXT:", response.text)
+        print("TEXT:", response.text)
 
     except Exception as e:
         return {"error": str(e)}
