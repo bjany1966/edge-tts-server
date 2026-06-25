@@ -6,8 +6,6 @@ app = FastAPI()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
-
 @app.get("/")
 def root():
     return {"status": "OK"}
@@ -21,6 +19,8 @@ async def stt(request: Request):
     print("USER:", text)
 
     try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+
         payload = {
             "contents": [
                 {
@@ -31,12 +31,12 @@ async def stt(request: Request):
             ]
         }
 
-        r = requests.post(GEMINI_URL, json=payload, timeout=20)
+        r = requests.post(url, json=payload, timeout=20)
         result = r.json()
 
-        answer = result["candidates"][0]["content"]["parts"][0]["text"]
+        print("RAW:", result)
 
-        print("AI:", answer)
+        answer = result["candidates"][0]["content"]["parts"][0]["text"]
 
         return {
             "text": text,
