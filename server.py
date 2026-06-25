@@ -28,10 +28,10 @@ async def stt(request: Request):
     # 🎤 1. WHISPER
     try:
         with open(tmp.name, "rb") as f:
-            transcript = client.audio.transcriptions.create(
-                model="whisper-1",
-                file=f
-            )
+    result = client.audio.transcriptions.create(
+        model="gpt-4o-mini-transcribe",
+        file=f
+    )
 
         user_text = transcript.text
         print("USER:", user_text)
@@ -61,5 +61,4 @@ async def stt(request: Request):
     except Exception as e:
     print("WHISPER FULL ERROR:", repr(e))
     return {"error": str(e)}
-        print("GPT ERROR:", repr(e))
         
