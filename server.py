@@ -49,4 +49,5 @@ async def stt(request: Request):
 
     except Exception as e:
         print("🔥 FULL ERROR:", repr(e))
+        print("KEY IS:", GEMINI_API_KEY)
         return {"error": str(e)}
