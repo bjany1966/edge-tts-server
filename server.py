@@ -4,7 +4,7 @@ import os
 
 app = FastAPI()
 
-# 🔑 ENV VAR (Renderről jön)
+# 🔑 API KEY (Render ENV-ből jön)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 
@@ -38,22 +38,33 @@ async def stt(request: Request):
             ]
         }
 
-        r = requests.post(url, json=payload, timeout=10, headers={"Content-Type":"application/json"})
+        print("BEFORE GEMINI")
 
+        try:
+            r = requests.post(
+                url,
+                json=payload,
+                timeout=10,
+                headers={"Content-Type": "application/json"}
+            )
+        except requests.exceptions.Timeout:
+            return {"error": "Gemini timeout"}
+
+        print("AFTER GEMINI")
         print("STATUS:", r.status_code)
-        print("RAW TEXT:", r.text)
+        print("RAW:", r.text)
 
         try:
             result = r.json()
         except Exception:
             return {
-                "error": "Gemini did not return JSON",
+                "error": "Invalid JSON from Gemini",
                 "raw": r.text
             }
 
         if "candidates" not in result:
             return {
-                "error": "No candidates in response",
+                "error": "No candidates",
                 "raw": result
             }
 
@@ -65,5 +76,5 @@ async def stt(request: Request):
         }
 
     except Exception as e:
-        print("🔥 HARD CRASH:", repr(e))
+        print("🔥 HARD ERROR:", repr(e))
         return {"error": str(e)}
