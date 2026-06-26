@@ -1,19 +1,28 @@
-from fastapi import FastAPI, Request
-import wave
+from fastapi import FastAPI
+import os
+from openai import OpenAI
 
 app = FastAPI()
 
-@app.post("/stt")
-async def stt(request: Request):
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-    audio = await request.body()
+@app.get("/")
+def home():
+    return {"status": "running"}
 
-    print("Bytes:", len(audio))
+@app.get("/test")
+def test():
 
-    with wave.open("test.wav", "wb") as wf:
-        wf.setnchannels(1)
-        wf.setsampwidth(2)
-        wf.setframerate(16000)
-        wf.writeframes(audio)
+    try:
+        response = client.responses.create(
+            model="gpt-4.1-mini",
+            input="Mondj egy szót magyarul."
+        )
 
-    return {"saved": len(audio)}
+        return {"reply": response.output_text}
+
+    except Exception as e:
+        return {
+            "type": type(e).__name__,
+            "error": str(e)
+        }
